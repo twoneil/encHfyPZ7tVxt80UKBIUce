@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏠 Chore Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* ── DM Sans — clean geometric neo-grotesque, sharper than Helvetica ── */
+:root {
+  --font-ui:   "DM Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+
+  --bg:      #0c0c0e;
+  --s1:      #131317;
+  --s2:      #1a1a21;
+  --s3:      #22222c;
+  --border:  #2a2a36;
+  --border2: #35354a;
+
+  --lou:     #6ee89b;   /* green  – Lou  */
+  --loud:    #162b20;
+  --hue:     #7db8ff;   /* blue   – Hue  */
+  --hued:    #101f36;
+
+  --am:      #ffc96b;
+  --amd:     #2e1f08;
+  --pm:      #c09eff;
+  --pmd:     #1e1330;
+
+  --col-wk:  #ffc96b;
+  --col-mo:  #7db8ff;
+
+  --txt:     #e8e8f2;
+  --muted:   #55556a;
+  --muted2:  #8888a2;
+
+  --r:       10px;
+  --w1:      #a8f0c0;
+  --w2:      #f0c8a8;
+  --w3:      #a8c8f0;
+  --w4:      #f0a8d0;
+
+  /* 3× text scale — base browser default is 16px, so 3× ≈ 48px base */
+  --sz-xs:   1.1rem;
+  --sz-sm:   1.25rem;
+  --sz-md:   1.5rem;
+  --sz-lg:   1.85rem;
+  --sz-xl:   2.4rem;
+  --sz-2xl:  3.2rem;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font-ui);
+  font-size: var(--sz-sm);
+  min-height: 100vh;
+  padding: 40px 28px 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+header { margin-bottom: 28px; }
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: var(--sz-2xl);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.subtitle {
+  font-size: var(--sz-xs);
+  color: var(--muted2);
+  margin-top: 8px;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+
+/* ── DATE DISPLAY ────────────────────────────────────────── */
+.date-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.date-day-name {
+  font-size: var(--sz-xs);
+  color: var(--muted2);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.date-main {
+  font-size: var(--sz-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--txt);
+}
+.date-year {
+  font-size: var(--sz-xs);
+  color: var(--muted2);
+  font-weight: 500;
+}
+
+/* ── CALENDAR + WEEK INDICATOR ROW ──────────────────────── */
+.cal-week-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+/* Mini Calendar */
+.mini-cal {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  flex: 1;
+  min-width: 260px;
+}
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.cal-month-label {
+  font-weight: 700;
+  font-size: var(--sz-sm);
+  letter-spacing: -0.01em;
+}
+.cal-nav {
+  display: flex;
+  gap: 4px;
+}
+.cal-nav-btn {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--sz-sm);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.cal-nav-btn:hover { color: var(--txt); border-color: var(--border2); }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: var(--sz-xs);
+  color: var(--muted);
+  font-weight: 600;
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cal-day {
+  text-align: center;
+  font-size: var(--sz-xs);
+  font-weight: 500;
+  padding: 5px 2px;
+  border-radius: 6px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.cal-day:hover { background: var(--s3); color: var(--txt); }
+.cal-day.other-month { color: var(--muted); opacity: 0.4; }
+.cal-day.today {
+  background: var(--lou);
+  color: #000;
+  font-weight: 800;
+}
+.cal-day.selected-day {
+  background: var(--s3);
+  color: var(--txt);
+  outline: 1.5px solid var(--border2);
+}
+.cal-day.today.selected-day {
+  background: var(--lou);
+  color: #000;
+  outline: none;
+}
+
+/* Week Indicator */
+.week-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  min-width: 120px;
+}
+.wi-label {
+  font-size: var(--sz-xs);
+  color: var(--muted2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.wi-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--sz-xl);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+  color: #000;
+}
+.wi-circle.w1 { background: var(--w1); }
+.wi-circle.w2 { background: var(--w2); }
+.wi-circle.w3 { background: var(--w3); }
+.wi-circle.w4 { background: var(--w4); }
+.wi-week-btns {
+  display: flex;
+  gap: 5px;
+}
+.wi-week-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--s2);
+  color: var(--muted2);
+  font-size: var(--sz-xs);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+  font-family: var(--font-ui);
+}
+.wi-week-btn:hover { border-color: var(--border2); color: var(--txt); }
+.wi-week-btn.active { color: #000; border-color: transparent; }
+.wi-week-btn.w1.active { background: var(--w1); }
+.wi-week-btn.w2.active { background: var(--w2); }
+.wi-week-btn.w3.active { background: var(--w3); }
+.wi-week-btn.w4.active { background: var(--w4); }
+
+
+
+/* ── BOTTOM SECTION ─────────────────────────────────────── */
+.bottom-bar .day-tabs {
+  margin-bottom: 10px;
+}
+.bottom-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bottom-week-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px 16px;
+}
+.bwb-label { font-weight: 700; font-size: var(--sz-sm); letter-spacing: -0.01em; }
+.bwb-note  { font-size: var(--sz-xs); color: var(--muted2); margin-top: 2px; font-weight: 400; }
+.bwb-done  { font-weight: 800; font-size: var(--sz-lg); letter-spacing: -0.03em; }
+.bottom-prog-wrap { }
+.bottom-prog-label {
+  font-size: var(--sz-xs); color: var(--muted2); margin-bottom: 5px; font-weight: 500;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.bottom-prog-pct { font-weight: 800; font-size: var(--sz-sm); }
+.bottom-prog-track { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.bottom-prog-fill  { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+.bottom-legend {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+}
+
+/* ── LEGEND (now only used at bottom) ───────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.leg {
+  display: flex; align-items: center; gap: 7px;
+  font-size: var(--sz-xs); color: var(--muted2); font-weight: 500;
+  background: var(--s1); border: 1px solid var(--border);
+  padding: 6px 16px; border-radius: 40px;
+}
+/* hide legend in header since it's now at bottom */
+#legendBar { display: none; }
+
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.d-lou{background:var(--lou)} .d-hue{background:var(--hue)}
+.d-am{background:var(--am)} .d-pm{background:var(--pm)}
+.d-daily{background:#ff8c8c} .d-wk{background:var(--col-wk)} .d-mo{background:var(--col-mo)}
+
+.reset-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted2); padding: 11px 22px; border-radius: 10px;
+  font-family: var(--font-ui); font-size: var(--sz-sm); font-weight: 600;
+  cursor: pointer; margin-top: 16px; transition: all 0.12s;
+}
+.reset-btn:hover { color: var(--txt); border-color: var(--border2); }
+
+/* ── DAY TABS ───────────────────────────────────────────── */
+.day-tabs {
+  display: flex; gap: 6px; margin-bottom: 20px;
+  overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;
+}
+.day-tabs::-webkit-scrollbar { display: none; }
+.day-tab {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--s1);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: var(--sz-sm);
+  cursor: pointer;
+  transition: all 0.12s;
+  line-height: 1.3;
+  text-align: center;
+  min-width: 80px;
+}
+.day-tab:hover { color: var(--muted2); border-color: var(--border2); }
+.day-tab.active { background: var(--s3); color: var(--txt); border-color: var(--border2); }
+.day-tab.is-today { border-color: var(--lou) !important; color: var(--lou) !important; }
+.day-tab.is-today.active { background: var(--loud); }
+.day-pip { font-size: var(--sz-xs); color: var(--muted2); display: block; margin-top: 3px; font-weight: 500; }
+
+/* ── STATS ROW ──────────────────────────────────────────── */
+.stats-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.stat {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 40px; padding: 8px 20px;
+  font-size: var(--sz-sm); font-weight: 500; display: flex; align-items: center; gap: 9px;
+}
+.sn { font-weight: 800; font-size: var(--sz-lg); letter-spacing: -0.02em; }
+.sn-wk{color:var(--col-wk)} .sn-mo{color:var(--col-mo)} .sn-done{color:var(--lou)}
+
+/* ── SESSION GRID ───────────────────────────────────────── */
+.session-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
+}
+@media(max-width:640px){ .session-grid { grid-template-columns: 1fr; } }
+
+.session-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.sess-head {
+  padding: 14px 20px;
+  font-family: var(--font-ui);
+  font-weight: 700; font-size: var(--sz-md); letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px;
+}
+.sess-head.lou { background: var(--loud); color: var(--lou); }
+.sess-head.hue { background: var(--hued); color: var(--hue); }
+
+.time-divider {
+  padding: 7px 20px;
+  font-size: var(--sz-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.am-div { background: var(--amd); color: var(--am); }
+.pm-div { background: var(--pmd); color: var(--pm); }
+
+.task-list { padding: 4px 0; }
+.task-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.1s; user-select: none;
+}
+.task-row:last-child { border-bottom: none; }
+.task-row.lou { background: #0d2318; }
+.task-row.hue { background: #0a1628; }
+.task-row.lou:hover { background: #122d20; }
+.task-row.hue:hover { background: #0e1e38; }
+.task-row.done .task-lbl {
+  text-decoration: line-through; opacity: 0.3;
+}
+
+.chk {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 2.5px solid var(--border2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--sz-sm); font-weight: 800; transition: all 0.12s;
+}
+.task-row.lou .chk { border-color: var(--lou); }
+.task-row.hue .chk { border-color: var(--hue); }
+.task-row.done.lou .chk { background: var(--lou); color: #000; border-color: var(--lou); }
+.task-row.done.hue .chk { background: var(--hue); color: #000; border-color: var(--hue); }
+
+.task-lbl  { flex: 1; font-size: var(--sz-sm); line-height: 1.5; color: var(--txt); font-weight: 500; }
+.task-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+
+.badge {
+  font-size: var(--sz-xs); padding: 3px 11px; border-radius: 40px;
+  font-family: var(--font-ui); font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+}
+.b-lou { background: var(--loud); color: var(--lou); }
+.b-hue { background: var(--hued); color: var(--hue); }
+.b-wk  { background: rgba(255,201,107,.14); color: var(--col-wk); }
+.b-mo  { background: rgba(125,184,255,.14); color: var(--col-mo); }
+.b-daily { background: rgba(255,120,120,.14); color: #ff8c8c; }
+.b-ns  { font-size: var(--sz-md); line-height: 1; }
+
+/* ── EMPTY ──────────────────────────────────────────────── */
+.empty {
+  text-align: center; padding: 56px 28px;
+  color: var(--muted); font-size: var(--sz-md); font-weight: 500;
+}
+.empty .e-icon { font-size: 3rem; margin-bottom: 14px; display: block; }
+
+/* ── RESET ──────────────────────────────────────────────── */
+.reset-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted2); padding: 11px 22px; border-radius: 10px;
+  font-family: var(--font-ui); font-size: var(--sz-sm); font-weight: 600;
+  cursor: pointer; margin-top: 16px; transition: all 0.12s;
+}
+.reset-btn:hover { color: var(--txt); border-color: var(--border2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>🏠 Chore Schedule</h1>
+      <div class="subtitle">Lou &amp; Hue · &lt;5 min per task · Morning 🔇 · End of Day 🔊</div>
+    </div>
+    <div class="date-display">
+      <div class="date-day-name" id="dateDayName">—</div>
+      <div class="date-main" id="dateMain">—</div>
+      <div class="date-year" id="dateYear">—</div>
+    </div>
+  </div>
+
+  <!-- Mini Calendar + Week Indicator -->
+  <div class="cal-week-row">
+    <div class="mini-cal">
+      <div class="cal-header">
+        <div class="cal-month-label" id="calMonthLabel">—</div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+          <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="week-indicator">
+      <div class="wi-label">Week</div>
+      <div class="wi-circle w1" id="wiCircle">1</div>
+      <div class="wi-week-btns" id="wiWeekBtns">
+        <button class="wi-week-btn w1 active" onclick="selectWeek(1,this)">1</button>
+        <button class="wi-week-btn w2"        onclick="selectWeek(2,this)">2</button>
+        <button class="wi-week-btn w3"        onclick="selectWeek(3,this)">3</button>
+        <button class="wi-week-btn w4"        onclick="selectWeek(4,this)">4</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" id="legendBar">
+    <div class="leg"><div class="dot d-lou"></div>Lou</div>
+    <div class="leg"><div class="dot d-hue"></div>Hue</div>
+    <div class="leg"><div class="dot d-am"></div>Morning 🔇 quiet</div>
+    <div class="leg"><div class="dot d-pm"></div>End of Day 🔊 loud ok</div>
+    <div class="leg"><div class="dot d-daily"></div>Every day</div>
+    <div class="leg"><div class="dot d-wk"></div>Every week</div>
+    <div class="leg"><div class="dot d-mo"></div>This week only (monthly)</div>
+  </div>
+</header>
+
+<div id="mainContent"></div>
+
+<div style="border-top:1px solid #2a2a36;padding:20px 0 32px;margin-top:32px;">
+  <div class="day-tabs" id="dayTabs"></div>
+  <div id="bottomMeta"></div>
+  <div id="legendBottom"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  TASK DATA
+//  person: 'lou' | 'hue'
+//  freq:   'weekly' | 'monthly-w1' … 'monthly-w4'
+//  time:   'am' | 'pm'
+//  noise:  'lo' | 'hi'
+// ═══════════════════════════════════════════════════════════════
+const TASKS = [
+
+  // ──────────────── DAILY EVENING (every day, every week) ──────
+  // ──────────────── DAILY EVERY DAY ────────────────────────────
+  // Laundry load — every morning, Lou
+  { id:'daily-laundry',     emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'sun', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-mon', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'mon', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-tue', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'tue', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-wed', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-thu', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-fri', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'fri', time:'am', person:'lou', noise:'lo' },
+  { id:'daily-laundry-sat', emoji:'🧺', name:'Laundry – load & delay start wash', freq:'weekly', day:'sat', time:'am', person:'lou', noise:'lo' },
+
+  // Fold dry laundry — every evening, Hue
+  { id:'daily-fold',     emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'sun', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-mon', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-tue', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'tue', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-wed', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'wed', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-thu', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'thu', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-fri', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'fri', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-fold-sat', emoji:'👕', name:'Fold and put away dry laundry', freq:'weekly', day:'sat', time:'pm', person:'hue', noise:'lo' },
+
+  // Cat water fountain — change daily, Hue, every evening
+  { id:'daily-catwater',     emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'sun', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-mon', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-tue', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'tue', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-wed', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'wed', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-thu', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'thu', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-fri', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'fri', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-catwater-sat', emoji:'🐱', name:"Change Cat's Water fountain", freq:'weekly', day:'sat', time:'pm', person:'hue', noise:'lo' },
+
+  // Empty dishwasher — every evening, alternating
+  { id:'daily-dish',     emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'sun', time:'pm', person:'lou', noise:'lo' },
+  { id:'daily-dish-mon', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-dish-tue', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'tue', time:'pm', person:'lou', noise:'lo' },
+  { id:'daily-dish-wed', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'wed', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-dish-thu', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'thu', time:'pm', person:'lou', noise:'lo' },
+  { id:'daily-dish-fri', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'fri', time:'pm', person:'hue', noise:'lo' },
+  { id:'daily-dish-sat', emoji:'🍽️', name:'Empty dishwasher', freq:'weekly', day:'sat', time:'pm', person:'lou', noise:'lo' },
+
+  // Vacuum stairs — every evening, alternating Lou/Hue
+  { id:'daily-stairs',     emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'sun', time:'pm', person:'lou', noise:'hi' },
+  { id:'daily-stairs-mon', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'mon', time:'pm', person:'hue', noise:'hi' },
+  { id:'daily-stairs-tue', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'tue', time:'pm', person:'lou', noise:'hi' },
+  { id:'daily-stairs-wed', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'wed', time:'pm', person:'hue', noise:'hi' },
+  { id:'daily-stairs-thu', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'thu', time:'pm', person:'lou', noise:'hi' },
+  { id:'daily-stairs-fri', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'fri', time:'pm', person:'hue', noise:'hi' },
+  { id:'daily-stairs-sat', emoji:'🪜', name:'Vacuum stairs', freq:'weekly', day:'sat', time:'pm', person:'lou', noise:'hi' },
+
+  // ──────────────── SUNDAY ─────────────────────────────────────
+  { id:'su-w1',  emoji:'🛏️', name:'Bedsheet & pillowcase change',              freq:'weekly',     day:'sun', time:'am', person:'lou', noise:'lo' },
+  { id:'su-w2',  emoji:'🛏️', name:'Guest room bedsheet change',                freq:'weekly',     day:'sun', time:'am', person:'hue', noise:'lo' },
+  { id:'su-w3',  emoji:'🏠', name:'Heat pump filter vacuum',                    freq:'weekly',     day:'sun', time:'pm', person:'lou', noise:'hi' },
+  { id:'su-w4',  emoji:'🪟', name:'Mirror wipes of Hallway, WalkinCloset, Guest room', freq:'weekly', day:'sun', time:'pm', person:'hue', noise:'lo' },
+  { id:'su-w5',  emoji:'🌊', name:"Deep clean Cat's Water fountain",            freq:'weekly',     day:'sun', time:'pm', person:'hue', noise:'lo' },
+  { id:'su-w6',  emoji:'🌿', name:'Water all plants',                           freq:'weekly',     day:'sun', time:'am', person:'hue', noise:'lo' },
+  { id:'su-m1a', emoji:'🛁', name:'Wipe Top of Tub edges',                     freq:'monthly-w1', day:'sun', time:'pm', person:'hue', noise:'lo' },
+  { id:'su-m1b', emoji:'🦇', name:'Batman – robot vacuum under main bed',       freq:'monthly-w1', day:'sun', time:'pm', person:'hue', noise:'hi' },
+  { id:'su-m2a', emoji:'🪣', name:'Bedroom baseboards & closet frame',          freq:'monthly-w2', day:'sun', time:'am', person:'lou', noise:'lo' },
+  { id:'su-m2b', emoji:'🪣', name:'Office baseboard + heater',                  freq:'monthly-w2', day:'sun', time:'am', person:'hue', noise:'lo' },
+  { id:'su-m3a', emoji:'🚪', name:'Bedroom: behind doors + doorframes',         freq:'monthly-w3', day:'sun', time:'am', person:'lou', noise:'lo' },
+  { id:'su-m3b', emoji:'🧺', name:'Comforter wash – bedroom',                   freq:'monthly-w3', day:'sun', time:'am', person:'hue', noise:'lo' },
+  { id:'su-m4a', emoji:'🔌', name:'Bedroom thermostat & switches wipe',         freq:'monthly-w4', day:'sun', time:'am', person:'lou', noise:'lo' },
+  { id:'su-m4b', emoji:'🛋️', name:'Under both bedside tables',                 freq:'monthly-w4', day:'sun', time:'am', person:'hue', noise:'lo' },
+
+  // ──────────────── MONDAY ─────────────────────────────────────
+  { id:'mo-w1',  emoji:'🍳', name:'Stove wipe & knob clean',                    freq:'weekly',     day:'mon', time:'am', person:'lou', noise:'lo' },
+  { id:'mo-w2',  emoji:'🌬️', name:'Wipe Airfryer and counter',                 freq:'weekly',     day:'mon', time:'am', person:'hue', noise:'lo' },
+  { id:'mo-w1b', emoji:'🚰', name:'Clear sink',                                 freq:'weekly',     day:'sat', time:'am', person:'hue', noise:'lo' },
+  { id:'mo-w3',  emoji:'🦸', name:'Superman – robot vacuum wipe & inspect',     freq:'monthly-w2', day:'mon', time:'pm', person:'lou', noise:'hi' },
+  { id:'mo-w3b', emoji:'🚪', name:'Doorman – robot vacuum wipe & inspect',      freq:'monthly-w2', day:'mon', time:'pm', person:'lou', noise:'lo' },
+  { id:'mo-gc1', emoji:'🗑️', name:'Empty Watercloset trash bin',                freq:'weekly',     day:'mon', time:'pm', person:'lou', noise:'lo' },
+  { id:'mo-gc2', emoji:'🗑️', name:'Empty Bathroom trash bin',                   freq:'weekly',     day:'mon', time:'pm', person:'lou', noise:'lo' },
+  { id:'mo-w4',  emoji:'🐈', name:'Cat fabric vacuum sofa',                     freq:'weekly',     day:'tue', time:'pm', person:'lou', noise:'hi' },
+  { id:'mo-w4b', emoji:'🐾', name:'Vacuum pet circular beds',                   freq:'weekly',     day:'mon', time:'pm', person:'lou', noise:'hi' },
+  { id:'mo-w4c', emoji:'🍜', name:'Wipe and vacuum pet auto feed station',      freq:'weekly',     day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'mo-w4d', emoji:'☕', name:'Wipe center table and organize storage',     freq:'weekly',     day:'mon', time:'pm', person:'lou', noise:'lo' },
+  { id:'mo-m1a', emoji:'🪣', name:'Baseboard – Kitchen',                        freq:'monthly-w1', day:'mon', time:'pm', person:'lou', noise:'lo' },
+  { id:'mo-m1b', emoji:'🪣', name:'Baseboard – Living Room',                    freq:'monthly-w1', day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'mo-m2a', emoji:'🔝', name:'Top of fridge & kitchen cabinets',           freq:'monthly-w2', day:'mon', time:'am', person:'hue', noise:'lo' },
+  { id:'mo-m3a', emoji:'🐱', name:'Cat tree deep clean & vacuum',               freq:'monthly-w3', day:'mon', time:'pm', person:'lou', noise:'hi' },
+  { id:'mo-m3b', emoji:'🐾', name:'Cat tunnel & pet bed deep clean',            freq:'monthly-w3', day:'mon', time:'pm', person:'hue', noise:'lo' },
+  { id:'mo-m4a', emoji:'🖼️', name:'Accent pieces & picture frames – LR',      freq:'monthly-w4', day:'mon', time:'am', person:'lou', noise:'lo' },
+  { id:'mo-m4b', emoji:'🎮', name:'Nintendo & PS console deep wipe',            freq:'monthly-w4', day:'mon', time:'am', person:'hue', noise:'lo' },
+
+  // ──────────────── TUESDAY ────────────────────────────────────
+  { id:'tu-w1',  emoji:'🪟', name:'Kitchen window sill wipe',                   freq:'weekly',     day:'tue', time:'am', person:'lou', noise:'lo' },
+  { id:'tu-w2',  emoji:'🖼️', name:'Stair mirror & picture frames wipe',        freq:'weekly',     day:'tue', time:'am', person:'hue', noise:'lo' },
+  { id:'tu-w3',  emoji:'🪟', name:'Stair window & ledge wipe',                  freq:'weekly',     day:'tue', time:'pm', person:'lou', noise:'lo' },
+  { id:'tu-w4',  emoji:'👟', name:'Entryway organizer tidy',                    freq:'weekly',     day:'tue', time:'pm', person:'hue', noise:'lo' },
+  { id:'tu-gc1', emoji:'🚮', name:'Take Black & Blue bins to curb',             freq:'weekly',     day:'tue', time:'pm', person:'hue', noise:'lo' },
+  { id:'tu-m1a', emoji:'🪣', name:'Stair baseboards (all ledges)',              freq:'monthly-w1', day:'tue', time:'pm', person:'lou', noise:'lo' },
+  { id:'tu-m1b', emoji:'🪣', name:'Hallway baseboards',                         freq:'monthly-w1', day:'tue', time:'pm', person:'hue', noise:'lo' },
+  { id:'tu-m2a', emoji:'🚪', name:'Hallway doorframes x4',                      freq:'monthly-w2', day:'tue', time:'am', person:'lou', noise:'lo' },
+  { id:'tu-m2b', emoji:'🧹', name:'Closet + stairs detail wipe',               freq:'monthly-w2', day:'tue', time:'am', person:'hue', noise:'lo' },
+  { id:'tu-m3a', emoji:'🧹', name:'Closet floor + organizer tidy',              freq:'monthly-w3', day:'tue', time:'am', person:'lou', noise:'lo' },
+  { id:'tu-m3b', emoji:'🪵', name:'Stair posts & between-post wipe',            freq:'monthly-w3', day:'tue', time:'am', person:'hue', noise:'lo' },
+  { id:'tu-m4a', emoji:'💡', name:'Stair fan dust & wipe',                      freq:'monthly-w4', day:'tue', time:'am', person:'lou', noise:'lo' },
+  { id:'tu-m4b', emoji:'🛒', name:'Stair divider wipe',                         freq:'monthly-w4', day:'tue', time:'am', person:'hue', noise:'lo' },
+
+  // ──────────────── WEDNESDAY ──────────────────────────────────
+  { id:'we-w1',  emoji:'🖥️', name:'Desk declutter & wipe – Office',            freq:'weekly',     day:'wed', time:'am', person:'hue', noise:'lo' },
+  { id:'we-w2',  emoji:'💻', name:'Monitor & laptop wipe – Lounge',             freq:'weekly',     day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'we-w2b', emoji:'📂', name:'Wipe left storage areas – Office',           freq:'weekly',     day:'wed', time:'am', person:'hue', noise:'lo' },
+  { id:'we-w3',  emoji:'🧹', name:'Office vacuum cat bed',                      freq:'weekly',     day:'wed', time:'pm', person:'hue', noise:'hi' },
+  { id:'we-w4',  emoji:'🏃', name:'Elliptical wipe-down',                       freq:'weekly',     day:'wed', time:'pm', person:'lou', noise:'lo' },
+  { id:'we-gc1', emoji:'🚮', name:'Take Organic bin to curb',                   freq:'weekly',     day:'wed', time:'pm', person:'lou', noise:'lo' },
+  { id:'we-gc2', emoji:'🗑️', name:'Empty Office trash bin',                     freq:'weekly',     day:'wed', time:'pm', person:'hue', noise:'lo' },
+  { id:'we-w4b', emoji:'🦇', name:'Batman – robot vacuum wipe & inspect',       freq:'monthly-w2', day:'thu', time:'pm', person:'lou', noise:'lo' },
+  { id:'we-m1a', emoji:'🪟', name:'Blinds – Kitchen & Walk-in Closet',          freq:'monthly-w1', day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'we-m1b', emoji:'🪟', name:'Blinds – Guest Room',                        freq:'monthly-w1', day:'wed', time:'am', person:'hue', noise:'lo' },
+  { id:'we-m2a', emoji:'⚡', name:'Zapper clean + stairs fan dust',             freq:'monthly-w2', day:'wed', time:'pm', person:'lou', noise:'lo' },
+  { id:'we-m2b', emoji:'💡', name:'Hallway fan, Office fan, Guest fan wipe',    freq:'monthly-w2', day:'wed', time:'pm', person:'hue', noise:'lo' },
+  { id:'we-m3a', emoji:'📺', name:'Lounge étager tops 1 & 2 wipe',              freq:'monthly-w3', day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'we-m3b', emoji:'📦', name:'Lounge étager tops 3 & 4 + bottom',          freq:'monthly-w3', day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'we-m4a', emoji:'🪣', name:'Lounge baseboard heater & table legs',       freq:'monthly-w4', day:'wed', time:'am', person:'lou', noise:'lo' },
+  { id:'we-m4b', emoji:'🧹', name:'Below storage + floor under elliptical',     freq:'monthly-w4', day:'wed', time:'am', person:'hue', noise:'lo' },
+
+  // ──────────────── THURSDAY ───────────────────────────────────
+  { id:'th-w1',  emoji:'🪥', name:'Watercloset counter & 2x mirrors',           freq:'weekly',     day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-w2',  emoji:'🪟', name:'Bedroom window & ledge wipe',                freq:'weekly',     day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-w3',  emoji:'🌀', name:'Vacuum Airblow Bathroom fans',               freq:'weekly',     day:'thu', time:'pm', person:'lou', noise:'hi' },
+  { id:'th-w4',  emoji:'🚿', name:'Clean Glass shower',                         freq:'weekly',     day:'thu', time:'pm', person:'hue', noise:'lo' },
+  { id:'th-w5',  emoji:'🧼', name:'Wipe sink counters – Main Bathroom',         freq:'weekly',     day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-w6',  emoji:'🧽', name:'Detail clean of sink items',                 freq:'weekly',     day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-gc1', emoji:'🗑️', name:'Empty Watercloset trash bin',                freq:'weekly',     day:'thu', time:'pm', person:'lou', noise:'lo' },
+  { id:'th-gc2', emoji:'🗑️', name:'Empty Bathroom trash bin',                   freq:'weekly',     day:'thu', time:'pm', person:'lou', noise:'lo' },
+  { id:'th-m1a', emoji:'🗂️', name:'Walk-in closet full sort & fix folds',      freq:'monthly-w1', day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-m1b', emoji:'🗂️', name:'Office vacuum back-of-door + laundry floor + details', freq:'monthly-w1', day:'thu', time:'am', person:'hue', noise:'hi' },
+  { id:'th-m1c', emoji:'📐', name:'Fix folding misalignments – Walk-in',        freq:'monthly-w1', day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-m2a', emoji:'🪞', name:'Walk-in: mirror, window & ledge',            freq:'monthly-w2', day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-m2b', emoji:'🪟', name:'Walk-in: blinds & back of door',             freq:'monthly-w2', day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-m3a', emoji:'🪣', name:'Walk-in baseboards, heater, under stepladder, under clothes', freq:'monthly-w3', day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-m3b', emoji:'🔌', name:'Walk-in switches, thermostat, necktie rack', freq:'monthly-w3', day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-m4a', emoji:'🚽', name:'Watercloset: behind toilet + under sink',    freq:'monthly-w4', day:'thu', time:'am', person:'lou', noise:'lo' },
+  { id:'th-m4b', emoji:'⚖️', name:'Watercloset: weight scale + hooks wipe',    freq:'monthly-w4', day:'thu', time:'am', person:'hue', noise:'lo' },
+  { id:'th-m4c', emoji:'🪣', name:'Main Bathroom baseboards & heater',          freq:'monthly-w4', day:'thu', time:'pm', person:'lou', noise:'lo' },
+  { id:'th-m4d', emoji:'🚽', name:'Clean behind toilet and toilet tissue area', freq:'monthly-w4', day:'thu', time:'pm', person:'hue', noise:'lo' },
+  { id:'th-m2c', emoji:'🛁', name:'Deep clean tub',                             freq:'monthly-w2', day:'thu', time:'pm', person:'hue', noise:'lo' },
+  { id:'th-m1d', emoji:'🧴', name:'Bathroom toilet deep clean',                 freq:'monthly-w1', day:'thu', time:'pm', person:'hue', noise:'lo' },
+
+  // ──────────────── FRIDAY ─────────────────────────────────────
+  { id:'fr-w1',  emoji:'🫧', name:'Washer & dryer door wipe – in and out',      freq:'weekly',     day:'fri', time:'am', person:'lou', noise:'lo' },
+  { id:'fr-w2',  emoji:'👗', name:'Walk-in closet clear table',                 freq:'weekly',     day:'fri', time:'am', person:'hue', noise:'lo' },
+  { id:'fr-w3',  emoji:'🧽', name:'Clean Washer soap dispenser and area',       freq:'weekly',     day:'fri', time:'pm', person:'lou', noise:'lo' },
+  { id:'fr-w4',  emoji:'📦', name:'Guest room cabinet & storage organize',      freq:'weekly',     day:'fri', time:'pm', person:'hue', noise:'lo' },
+  { id:'fr-m1a', emoji:'🪥', name:'Watercloset flosser deep clean',             freq:'monthly-w1', day:'fri', time:'am', person:'hue', noise:'lo' },
+  { id:'fr-m2a', emoji:'🔧', name:'Vacuum filter change & container clean',     freq:'monthly-w2', day:'fri', time:'pm', person:'lou', noise:'lo' },
+  { id:'fr-m2b', emoji:'🛒', name:'Rolling storage wipe',                      freq:'monthly-w2', day:'fri', time:'pm', person:'hue', noise:'lo' },
+  { id:'fr-m3a', emoji:'🚪', name:'Laundry clean outside & inside door glass and edges', freq:'monthly-w3', day:'fri', time:'am', person:'lou', noise:'lo' },
+  { id:'fr-m3b', emoji:'🗑️', name:'Guest room: misplaced items sort',           freq:'monthly-w3', day:'fri', time:'am', person:'hue', noise:'lo' },
+  { id:'fr-m3c', emoji:'📋', name:'Laundry organize misplaced items',           freq:'monthly-w3', day:'fri', time:'am', person:'lou', noise:'lo' },
+  { id:'fr-m3d', emoji:'🧹', name:'Deep clean vacuum – Laundry',                freq:'monthly-w3', day:'fri', time:'pm', person:'lou', noise:'hi' },
+  { id:'fr-m4a', emoji:'🖨️', name:'Office printer wipe & desk detail',         freq:'monthly-w4', day:'fri', time:'am', person:'lou', noise:'lo' },
+  { id:'fr-m4b', emoji:'🪟', name:'Office window, ledge & back of door',        freq:'monthly-w4', day:'fri', time:'am', person:'hue', noise:'lo' },
+
+  // ──────────────── SATURDAY ───────────────────────────────────
+  { id:'sa-w1',  emoji:'🔥', name:'Microwave inside & outside clean',           freq:'weekly',     day:'sat', time:'am', person:'hue', noise:'lo' },
+  { id:'sa-w2',  emoji:'💨', name:'Kitchen vent filter wipe',                   freq:'weekly',     day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-w3',  emoji:'🌿', name:'Balcony inside bartable wipe',               freq:'weekly',     day:'sat', time:'pm', person:'lou', noise:'lo' },
+  { id:'sa-w4',  emoji:'🍽️', name:'Island & kitchen counter detail wipe',      freq:'weekly',     day:'sat', time:'pm', person:'hue', noise:'lo' },
+  { id:'sa-w5',  emoji:'🏗️', name:'Choose one Home Project',                   freq:'weekly',     day:'sat', time:'pm', person:'lou', noise:'lo' },
+  { id:'sa-m1a', emoji:'🔌', name:'Kitchen switches + microwave area wipe',     freq:'monthly-w1', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m1b', emoji:'⚡', name:'Kitchen zapper clean',                       freq:'monthly-w1', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m1c', emoji:'🏊', name:'Add Chlorine pucks to Pool & Spa',           freq:'monthly-w1', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m2a', emoji:'🪞', name:'Guest room: mirror, frames, switches',       freq:'monthly-w2', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m2b', emoji:'🪟', name:'Guest room: window, edge & blinds',          freq:'monthly-w2', day:'sat', time:'am', person:'hue', noise:'lo' },
+  { id:'sa-m2c', emoji:'💨', name:'Vacuum Air purifiers 2x',                    freq:'monthly-w2', day:'sat', time:'am', person:'lou', noise:'hi' },
+  { id:'sa-m3a', emoji:'🪑', name:'Guest room: round chairs + bar table bottom',freq:'monthly-w3', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m3b', emoji:'🔦', name:'Guest room: spotlight + floor under bar',    freq:'monthly-w3', day:'sat', time:'am', person:'hue', noise:'lo' },
+  { id:'sa-m3c', emoji:'🧹', name:'Wipe kitchen garbage can inside & out',      freq:'monthly-w3', day:'sat', time:'pm', person:'hue', noise:'lo' },
+  { id:'sa-m3d', emoji:'🏊', name:'Add Chlorine pucks to Pool & Spa',           freq:'monthly-w3', day:'sat', time:'am', person:'lou', noise:'lo' },
+  { id:'sa-m4a', emoji:'📄', name:'Shred paper – Lounge',                       freq:'monthly-w4', day:'sat', time:'pm', person:'lou', noise:'lo' },
+  { id:'sa-m4b', emoji:'🗂️', name:'Lounge: sort containers + shredder area',   freq:'monthly-w4', day:'sat', time:'pm', person:'hue', noise:'lo' },
+  { id:'sa-m4c', emoji:'🚿', name:'Hose down Spa Filter',                       freq:'monthly-w4', day:'sat', time:'am', person:'lou', noise:'lo' },
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+const checked = {};
+let curWeek   = 1;
+let curDay    = 'mon';
+
+const DAY_ORDER  = ['sun','mon','tue','wed','thu','fri','sat'];
+const DAY_NAMES  = { sun:'Sunday', mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday', fri:'Friday', sat:'Saturday' };
+const DAY_SHORT  = { sun:'Sun', mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat' };
+const TODAY_KEY  = DAY_ORDER[new Date().getDay()];
+const WEEK_COLORS = { 1:'#a8f0c0', 2:'#f0c8a8', 3:'#a8c8f0', 4:'#f0a8d0' };
+const WEEK_NOTES  = {
+  1:'Weekly tasks + Monthly deep-clean set A',
+  2:'Weekly tasks + Monthly deep-clean set B',
+  3:'Weekly tasks + Monthly deep-clean set C',
+  4:'Weekly tasks + Monthly deep-clean set D'
+};
+
+// ── DAILY TASK BASE IDS (appear every day) ─────────────────────
+const DAILY_BASE = new Set(['daily-laundry','daily-fold','daily-dish','daily-stairs','daily-catwater']);
+function isDailyTask(t) {
+  // strip the day suffix to get base id
+  const base = t.id.replace(/-(?:mon|tue|wed|thu|fri|sat|sun)$/, '');
+  return DAILY_BASE.has(base) || DAILY_BASE.has(t.id);
+}
+
+// ── HELPERS ────────────────────────────────────────────────────
+const freqMatch  = (freq, week) => freq === 'weekly' || freq === `monthly-w${week}`;
+const isMonthly  = (freq)       => freq.startsWith('monthly');
+const taskKey    = (t, week)    => `w${week}__${t.id}`;
+const getDayTasks = (week, day) => TASKS.filter(t => t.day === day && freqMatch(t.freq, week));
+
+// All tasks visible in current week, all days
+function getWeekTasks(week) {
+  return TASKS.filter(t => freqMatch(t.freq, week));
+}
+
+// ── TOGGLE ─────────────────────────────────────────────────────
+function toggle(key) {
+  checked[key] = !checked[key];
+  saveState();
+  render();
+}
+
+// ── PERSIST ────────────────────────────────────────────────────
+function saveState() {
+  try {
+    localStorage.setItem('chore_checked', JSON.stringify(checked));
+    localStorage.setItem('chore_week', String(curWeek));
+    localStorage.setItem('chore_day',  curDay);
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('chore_checked');
+    if (raw) Object.assign(checked, JSON.parse(raw));
+    const w = localStorage.getItem('chore_week');
+    if (w) curWeek = parseInt(w, 10);
+    const d = localStorage.getItem('chore_day');
+    if (d) curDay = d;
+  } catch(e) {}
+}
+
+// ── CALENDAR STATE ─────────────────────────────────────────────
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-indexed
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const today    = new Date();
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay  = new Date(calYear, calMonth + 1, 0);
+  const MONTHS   = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+  const DOW      = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  document.getElementById('calMonthLabel').textContent =
+    `${MONTHS[calMonth]} ${calYear}`;
+
+  let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // leading blanks
+  for (let i = 0; i < firstDay.getDay(); i++)
+    html += `<div class="cal-day other-month"></div>`;
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const isToday    = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    const selDate    = new Date(); selDate.setHours(0,0,0,0);
+    const thisDate   = new Date(calYear, calMonth, d);
+    const dayKey     = DAY_ORDER[thisDate.getDay()];
+    const isSelected = (calYear === today.getFullYear() && calMonth === today.getMonth())
+                       ? dayKey === curDay
+                       : false;
+    const cls = [isToday ? 'today' : '', isSelected ? 'selected-day' : ''].filter(Boolean).join(' ');
+    html += `<div class="cal-day ${cls}" onclick="calSelectDay(${calYear},${calMonth},${d})">${d}</div>`;
+  }
+
+  // trailing blanks
+  const trailing = (7 - ((firstDay.getDay() + lastDay.getDate()) % 7)) % 7;
+  for (let i = 0; i < trailing; i++)
+    html += `<div class="cal-day other-month"></div>`;
+
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function calSelectDay(y, m, d) {
+  const clicked = new Date(y, m, d);
+  curDay = DAY_ORDER[clicked.getDay()];
+  // if navigating to a different month, snap calendar back to show today's month
+  calYear  = y;
+  calMonth = m;
+  saveState();
+  render();
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function render() {
+  // Date display
+  const now    = new Date();
+  const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('dateDayName').textContent = DAYS[now.getDay()];
+  document.getElementById('dateMain').textContent    = `${MONTHS[now.getMonth()]} ${now.getDate()}`;
+  document.getElementById('dateYear').textContent    = now.getFullYear();
+
+  // Week circle
+  const wc = document.getElementById('wiCircle');
+  wc.textContent = curWeek;
+  wc.className   = `wi-circle w${curWeek}`;
+
+  // Week mini-buttons sync
+  document.querySelectorAll('.wi-week-btn').forEach(b => b.classList.remove('active'));
+  const activeWi = document.querySelector(`.wi-week-btn.w${curWeek}`);
+  if (activeWi) activeWi.classList.add('active');
+
+  renderCalendar();
+  renderDayTabs();
+  renderMain();
+}
+
+// ── DAY TABS ───────────────────────────────────────────────────
+function renderDayTabs() {
+  const html = DAY_ORDER.map(d => {
+    const tasks    = getDayTasks(curWeek, d);
+    const done     = tasks.filter(t => checked[taskKey(t, curWeek)]).length;
+    const total    = tasks.length;
+    const isActive = d === curDay    ? 'active'   : '';
+    const isToday  = d === TODAY_KEY ? 'is-today' : '';
+    const pip = total > 0
+      ? `<span class="day-pip">${done}/${total}</span>`
+      : `<span class="day-pip">—</span>`;
+    return `<button class="day-tab ${isActive} ${isToday}" onclick="selectDay('${d}')">${DAY_SHORT[d]}${pip}</button>`;
+  }).join('');
+  document.getElementById('dayTabs').innerHTML = html;
+}
+
+// ── MAIN CONTENT ───────────────────────────────────────────────
+function renderMain() {
+  const tasks      = getDayTasks(curWeek, curDay);
+  const total      = tasks.length;
+  const done       = tasks.filter(t => checked[taskKey(t, curWeek)]).length;
+  const pct        = total ? Math.round((done / total) * 100) : 0;
+  const wkCol      = WEEK_COLORS[curWeek];
+  const wkCount    = tasks.filter(t => t.freq === 'weekly' && !isDailyTask(t)).length;
+  const moCount    = tasks.filter(t => isMonthly(t.freq)).length;
+  const dailyCount = tasks.filter(t => isDailyTask(t)).length;
+
+  const louTasks = tasks.filter(t => t.person === 'lou');
+  const hueTasks = tasks.filter(t => t.person === 'hue');
+
+  // ── TOP: person columns ───────────────────────────────────────
+  let topHtml = '';
+  if (!tasks.length) {
+    topHtml = `<div class="empty"><div class="e-icon">😌</div>No tasks for Week ${curWeek} · ${DAY_NAMES[curDay]}.<br>Enjoy the break!</div>`;
+  } else {
+    topHtml = `<div class="session-grid">
+      ${personCard('lou', louTasks)}
+      ${personCard('hue', hueTasks)}
+    </div>`;
+  }
+  topHtml += `<button class="reset-btn" onclick="resetDay()">↺ Reset ${DAY_NAMES[curDay]}</button>`;
+  document.getElementById('mainContent').innerHTML = topHtml;
+
+  // ── BOTTOM: week banner + progress + stats + legend ───────────
+  const bottomHtml = `
+    <div class="bottom-meta">
+      <div class="bottom-week-banner">
+        <div>
+          <div class="bwb-label" style="color:${wkCol}">WEEK ${curWeek} · ${DAY_NAMES[curDay]}</div>
+          <div class="bwb-note">${WEEK_NOTES[curWeek]}</div>
+        </div>
+        <div class="bwb-done" style="color:${wkCol}">${done}/${total}</div>
+      </div>
+      <div class="bottom-prog-wrap">
+        <div class="bottom-prog-label">
+          <span>Day progress</span>
+          <span class="bottom-prog-pct" style="color:${wkCol}">${pct}%</span>
+        </div>
+        <div class="bottom-prog-track">
+          <div class="bottom-prog-fill" style="width:${pct}%;background:${wkCol}"></div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><span class="sn" style="color:#ff8c8c">${dailyCount}</span> daily</div>
+        <div class="stat"><span class="sn sn-wk">${wkCount}</span> weekly</div>
+        <div class="stat"><span class="sn sn-mo">${moCount}</span> monthly</div>
+        <div class="stat"><span class="sn sn-done">${done}</span> done</div>
+      </div>
+    </div>
+    <div class="bottom-legend">
+      <div class="leg"><div class="dot d-lou"></div>Lou</div>
+      <div class="leg"><div class="dot d-hue"></div>Hue</div>
+      <div class="leg"><div class="dot d-am"></div>Morning 🔇</div>
+      <div class="leg"><div class="dot d-pm"></div>End of Day 🔊</div>
+      <div class="leg"><div class="dot d-daily"></div>Daily</div>
+      <div class="leg"><div class="dot d-wk"></div>Weekly</div>
+      <div class="leg"><div class="dot d-mo"></div>Monthly</div>
+    </div>`;
+  document.getElementById('bottomMeta').innerHTML = bottomHtml;
+}
+
+// ── PERSON CARD ────────────────────────────────────────────────
+function personCard(person, tasks) {
+  const name    = person === 'lou' ? 'Lou' : 'Hue';
+  const col     = person === 'lou' ? 'var(--lou)' : 'var(--hue)';
+  const headCls = person === 'lou' ? 'lou' : 'hue';
+
+  // Morning: am tasks, quiet first within am is fine as-is
+  const amTasks = tasks.filter(t => t.time === 'am');
+  // End of Day: noisy first, then quiet
+  const pmAll   = tasks.filter(t => t.time === 'pm');
+  const pmTasks = [
+    ...pmAll.filter(t => t.noise === 'hi'),
+    ...pmAll.filter(t => t.noise !== 'hi')
+  ];
+
+  if (!tasks.length) {
+    return `<div class="session-card">
+      <div class="sess-head ${headCls}" style="border-bottom:2px solid ${col}">
+        ${person === 'lou' ? '🟢' : '🔵'} ${name}
+      </div>
+      <div style="padding:16px;font-size:var(--sz-xs);color:var(--muted)">Nothing today ✓</div>
+    </div>`;
+  }
+
+  let rows = '';
+
+  if (amTasks.length) {
+    rows += `<div class="time-divider am-div">☀️ Morning</div>`;
+    rows += amTasks.map(t => taskRow(t)).join('');
+  }
+
+  if (pmTasks.length) {
+    rows += `<div class="time-divider pm-div">🌙 End of Day</div>`;
+    rows += pmTasks.map(t => taskRow(t)).join('');
+  }
+
+  return `<div class="session-card">
+    <div class="sess-head ${headCls}" style="border-bottom:2px solid ${col}">
+      ${person === 'lou' ? '🟢' : '🔵'} ${name}
+    </div>
+    <div class="task-list">${rows}</div>
+  </div>`;
+}
+
+function taskRow(t) {
+  const key    = taskKey(t, curWeek);
+  const done   = checked[key] ? 'done' : '';
+  const chk    = checked[key] ? '✓'   : '';
+  const isDaily = isDailyTask(t);
+  const freq   = isDaily ? 'DAILY' : (t.freq === 'weekly' ? 'WEEKLY' : 'MONTHLY');
+  const fc     = isDaily ? 'b-daily' : (t.freq === 'weekly' ? 'b-wk' : 'b-mo');
+  const ns     = t.noise === 'hi' ? '🔊' : '🔇';
+  return `<div class="task-row ${t.person} ${done}" onclick="toggle('${key}')">
+    <div class="chk">${chk}</div>
+    <div class="task-lbl">${t.emoji} ${t.name}</div>
+    <div class="task-meta">
+      <span class="badge ${fc}">${freq}</span>
+      <span class="b-ns">${ns}</span>
+    </div>
+  </div>`;
+}
+
+function sessionCard() {} // kept for safety, replaced by personCard
+
+// ── CONTROLS ───────────────────────────────────────────────────
+function selectWeek(week, btn) {
+  curWeek = week;
+  document.querySelectorAll('.wi-week-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  saveState();
+  render();
+}
+
+function selectDay(day) {
+  curDay = day;
+  saveState();
+  render();
+}
+
+function resetDay() {
+  getDayTasks(curWeek, curDay).forEach(t => { checked[taskKey(t, curWeek)] = false; });
+  saveState();
+  render();
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+loadState();
+if (!localStorage.getItem('chore_day')) curDay = TODAY_KEY;
+render();
+</script>
+</body>
+</html>
