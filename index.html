@@ -877,7 +877,6 @@ function renderMain() {
   const tasks      = getDayTasks(curWeek, curDay);
   const total      = tasks.length;
   const done       = tasks.filter(t => checked[taskKey(t, curWeek)]).length;
-  const pct        = total ? Math.round((done / total) * 100) : 0;
   const wkCol      = WEEK_COLORS[curWeek];
   const wkCount    = tasks.filter(t => t.freq === 'weekly' && !isDailyTask(t)).length;
   const moCount    = tasks.filter(t => isMonthly(t.freq)).length;
@@ -899,7 +898,27 @@ function renderMain() {
   topHtml += `<button class="reset-btn" onclick="resetDay()">↺ Reset ${DAY_NAMES[curDay]}</button>`;
   document.getElementById('mainContent').innerHTML = topHtml;
 
-  // ── BOTTOM: week banner + progress + stats + legend ───────────
+  // ── WEEKLY PROGRESS: all days this week ───────────────────────
+  let wkDone = 0, wkTotal = 0;
+  DAY_ORDER.forEach(d => {
+    const dt = getDayTasks(curWeek, d);
+    wkTotal += dt.length;
+    wkDone  += dt.filter(t => checked[taskKey(t, curWeek)]).length;
+  });
+  const wkPct = wkTotal ? Math.round((wkDone / wkTotal) * 100) : 0;
+
+  // ── MONTHLY PROGRESS: all 4 weeks of the cycle ────────────────
+  let moDone = 0, moTotal = 0;
+  [1,2,3,4].forEach(w => {
+    DAY_ORDER.forEach(d => {
+      const dt = getDayTasks(w, d);
+      moTotal += dt.length;
+      moDone  += dt.filter(t => checked[taskKey(t, w)]).length;
+    });
+  });
+  const moPct = moTotal ? Math.round((moDone / moTotal) * 100) : 0;
+
+  // ── BOTTOM ────────────────────────────────────────────────────
   const bottomHtml = `
     <div class="bottom-meta">
       <div class="bottom-week-banner">
@@ -907,22 +926,34 @@ function renderMain() {
           <div class="bwb-label" style="color:${wkCol}">WEEK ${curWeek} · ${DAY_NAMES[curDay]}</div>
           <div class="bwb-note">${WEEK_NOTES[curWeek]}</div>
         </div>
-        <div class="bwb-done" style="color:${wkCol}">${done}/${total}</div>
+        <div class="bwb-done" style="color:${wkCol}">${done}/${total} today</div>
       </div>
+
       <div class="bottom-prog-wrap">
         <div class="bottom-prog-label">
-          <span>Day progress</span>
-          <span class="bottom-prog-pct" style="color:${wkCol}">${pct}%</span>
+          <span>Weekly progress</span>
+          <span class="bottom-prog-pct" style="color:${wkCol}">${wkPct}% &nbsp;<span style="font-size:var(--sz-xs);color:var(--muted2)">${wkDone}/${wkTotal}</span></span>
         </div>
         <div class="bottom-prog-track">
-          <div class="bottom-prog-fill" style="width:${pct}%;background:${wkCol}"></div>
+          <div class="bottom-prog-fill" style="width:${wkPct}%;background:${wkCol}"></div>
         </div>
       </div>
-      <div class="stats-row">
+
+      <div class="bottom-prog-wrap" style="margin-top:10px">
+        <div class="bottom-prog-label">
+          <span>Monthly cycle progress</span>
+          <span class="bottom-prog-pct" style="color:var(--col-mo)">${moPct}% &nbsp;<span style="font-size:var(--sz-xs);color:var(--muted2)">${moDone}/${moTotal}</span></span>
+        </div>
+        <div class="bottom-prog-track">
+          <div class="bottom-prog-fill" style="width:${moPct}%;background:var(--col-mo)"></div>
+        </div>
+      </div>
+
+      <div class="stats-row" style="margin-top:12px">
         <div class="stat"><span class="sn" style="color:#ff8c8c">${dailyCount}</span> daily</div>
         <div class="stat"><span class="sn sn-wk">${wkCount}</span> weekly</div>
         <div class="stat"><span class="sn sn-mo">${moCount}</span> monthly</div>
-        <div class="stat"><span class="sn sn-done">${done}</span> done</div>
+        <div class="stat"><span class="sn sn-done">${done}</span> done today</div>
       </div>
     </div>
     <div class="bottom-legend">
@@ -937,20 +968,73 @@ function renderMain() {
   document.getElementById('bottomMeta').innerHTML = bottomHtml;
 }
 
+// ── PAST 3 DAYS UNDONE ─────────────────────────────────────────
+function getPast3DaysUndone(person) {
+  // Build ordered list of days leading up to (not including) curDay this week
+  const curIdx   = DAY_ORDER.indexOf(curDay);
+  const results  = [];
+
+  for (let offset = 1; offset <= 3; offset++) {
+    let dayIdx = curIdx - offset;
+    let week   = curWeek;
+    if (dayIdx < 0) {
+      dayIdx += 7;
+      week = curWeek > 1 ? curWeek - 1 : 4;
+    }
+    const day   = DAY_ORDER[dayIdx];
+    const dt    = getDayTasks(week, day).filter(t => t.person === person);
+    const undone = dt.filter(t => !checked[taskKey(t, week)]).length;
+    if (undone > 0) {
+      results.push({ day, week, undone, label: DAY_SHORT[day] });
+    }
+  }
+  return results; // max 3 items
+}
+
 // ── PERSON CARD ────────────────────────────────────────────────
 function personCard(person, tasks) {
   const name    = person === 'lou' ? 'Lou' : 'Hue';
   const col     = person === 'lou' ? 'var(--lou)' : 'var(--hue)';
+  const colHex  = person === 'lou' ? '#6ee89b' : '#7db8ff';
   const headCls = person === 'lou' ? 'lou' : 'hue';
 
-  // Morning: am tasks, quiet first within am is fine as-is
   const amTasks = tasks.filter(t => t.time === 'am');
-  // End of Day: noisy first, then quiet
   const pmAll   = tasks.filter(t => t.time === 'pm');
   const pmTasks = [
     ...pmAll.filter(t => t.noise === 'hi'),
     ...pmAll.filter(t => t.noise !== 'hi')
   ];
+
+  // Past 3 days undone footer
+  const past3   = getPast3DaysUndone(person);
+  let pastFooter = '';
+  if (past3.length > 0) {
+    const chips = past3.map(p => `
+      <button onclick="jumpToDay('${p.day}',${p.week})" style="
+        display:inline-flex;align-items:center;gap:6px;
+        background:rgba(255,100,100,0.12);border:1px solid rgba(255,100,100,0.3);
+        color:#ff8c8c;border-radius:20px;padding:5px 12px;
+        font-family:var(--font-ui);font-size:var(--sz-xs);font-weight:700;
+        cursor:pointer;transition:background 0.1s;" 
+        onmouseover="this.style.background='rgba(255,100,100,0.22)'"
+        onmouseout="this.style.background='rgba(255,100,100,0.12)'">
+        <span style="
+          background:#ff8c8c;color:#000;border-radius:50%;
+          width:22px;height:22px;display:inline-flex;align-items:center;
+          justify-content:center;font-size:var(--sz-xs);font-weight:800;flex-shrink:0">
+          ${p.undone}
+        </span>
+        ${p.label} W${p.week}
+      </button>`).join('');
+    pastFooter = `
+      <div style="
+        padding:10px 16px 12px;
+        border-top:1px solid var(--border);
+        display:flex;flex-wrap:wrap;gap:7px;align-items:center;">
+        <span style="font-size:var(--sz-xs);color:var(--muted2);font-weight:500">Undone:</span>
+        ${chips}
+      </div>`;
+  }
 
   if (!tasks.length) {
     return `<div class="session-card">
@@ -958,16 +1042,15 @@ function personCard(person, tasks) {
         ${person === 'lou' ? '🟢' : '🔵'} ${name}
       </div>
       <div style="padding:16px;font-size:var(--sz-xs);color:var(--muted)">Nothing today ✓</div>
+      ${pastFooter}
     </div>`;
   }
 
   let rows = '';
-
   if (amTasks.length) {
     rows += `<div class="time-divider am-div">☀️ Morning</div>`;
     rows += amTasks.map(t => taskRow(t)).join('');
   }
-
   if (pmTasks.length) {
     rows += `<div class="time-divider pm-div">🌙 End of Day</div>`;
     rows += pmTasks.map(t => taskRow(t)).join('');
@@ -978,7 +1061,26 @@ function personCard(person, tasks) {
       ${person === 'lou' ? '🟢' : '🔵'} ${name}
     </div>
     <div class="task-list">${rows}</div>
+    ${pastFooter}
   </div>`;
+}
+
+function jumpToDay(day, week) {
+  curDay  = day;
+  curWeek = week;
+  // snap calendar to the right month — find the actual date
+  const today = new Date();
+  const anchor = new Date(ANCHOR);
+  const weekOffset = week - 1;
+  const dayIdx = DAY_ORDER.indexOf(day);
+  // find next occurrence of this weekday in this week cycle
+  // estimate: anchor + weekOffset*7 + dayIdx
+  const targetDate = new Date(anchor);
+  targetDate.setDate(anchor.getDate() + weekOffset * 7 + dayIdx);
+  calYear  = targetDate.getFullYear();
+  calMonth = targetDate.getMonth();
+  saveState();
+  render();
 }
 
 function taskRow(t) {
