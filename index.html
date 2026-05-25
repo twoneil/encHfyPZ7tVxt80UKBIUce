@@ -472,6 +472,7 @@ h1 {
       <div class="cal-header">
         <div class="cal-month-label" id="calMonthLabel">—</div>
         <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="goToday()" title="Go to today" style="font-size:var(--sz-xs);font-weight:700;width:auto;padding:0 10px;">Today</button>
           <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
           <button class="cal-nav-btn" onclick="calNav(1)">›</button>
         </div>
@@ -479,14 +480,9 @@ h1 {
       <div class="cal-grid" id="calGrid"></div>
     </div>
     <div class="week-indicator">
-      <div class="wi-label">Week</div>
+      <div class="wi-label">Currently on</div>
       <div class="wi-circle w1" id="wiCircle">1</div>
-      <div class="wi-week-btns" id="wiWeekBtns">
-        <button class="wi-week-btn w1 active" onclick="selectWeek(1,this)">1</button>
-        <button class="wi-week-btn w2"        onclick="selectWeek(2,this)">2</button>
-        <button class="wi-week-btn w3"        onclick="selectWeek(3,this)">3</button>
-        <button class="wi-week-btn w4"        onclick="selectWeek(4,this)">4</button>
-      </div>
+      <div style="font-size:var(--sz-xs);color:var(--muted2);font-weight:500;text-align:center" id="wiSubLabel">of 4-week cycle</div>
     </div>
   </div>
 
@@ -757,15 +753,36 @@ function loadState() {
   } catch(e) {}
 }
 
+// ── ANCHOR DATE: May 17, 2026 (Sunday) = Day 1 of Week 1 ──────
+const ANCHOR = new Date(2026, 4, 17); // 4 = May (0-indexed)
+ANCHOR.setHours(0, 0, 0, 0);
+
+function getWeekForDate(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((d - ANCHOR) / (1000 * 60 * 60 * 24));
+  return (Math.floor(((diffDays % 28) + 28) % 28 / 7)) + 1; // 1–4
+}
+
 // ── CALENDAR STATE ─────────────────────────────────────────────
 let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth(); // 0-indexed
+let calMonth = new Date().getMonth();
 
 function calNav(dir) {
   calMonth += dir;
   if (calMonth > 11) { calMonth = 0;  calYear++; }
   if (calMonth < 0)  { calMonth = 11; calYear--; }
   renderCalendar();
+}
+
+function goToday() {
+  const now = new Date();
+  calYear   = now.getFullYear();
+  calMonth  = now.getMonth();
+  curDay    = TODAY_KEY;
+  curWeek   = getWeekForDate(now);
+  saveState();
+  render();
 }
 
 function renderCalendar() {
@@ -775,29 +792,31 @@ function renderCalendar() {
   const MONTHS   = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
   const DOW      = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const WK_COLORS = { 1:'#a8f0c0', 2:'#f0c8a8', 3:'#a8c8f0', 4:'#f0a8d0' };
 
-  document.getElementById('calMonthLabel').textContent =
-    `${MONTHS[calMonth]} ${calYear}`;
+  document.getElementById('calMonthLabel').textContent = `${MONTHS[calMonth]} ${calYear}`;
 
   let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
 
-  // leading blanks
   for (let i = 0; i < firstDay.getDay(); i++)
     html += `<div class="cal-day other-month"></div>`;
 
   for (let d = 1; d <= lastDay.getDate(); d++) {
-    const isToday    = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
-    const selDate    = new Date(); selDate.setHours(0,0,0,0);
     const thisDate   = new Date(calYear, calMonth, d);
+    const isToday    = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
     const dayKey     = DAY_ORDER[thisDate.getDay()];
-    const isSelected = (calYear === today.getFullYear() && calMonth === today.getMonth())
-                       ? dayKey === curDay
-                       : false;
-    const cls = [isToday ? 'today' : '', isSelected ? 'selected-day' : ''].filter(Boolean).join(' ');
-    html += `<div class="cal-day ${cls}" onclick="calSelectDay(${calYear},${calMonth},${d})">${d}</div>`;
+    const wk         = getWeekForDate(thisDate);
+    const wkColor    = WK_COLORS[wk];
+    const isSelected = (dayKey === curDay && wk === curWeek);
+
+    let style = '';
+    if (isToday)         style = `background:var(--lou);color:#000;font-weight:800;`;
+    else if (isSelected) style = `background:var(--s3);outline:1.5px solid var(--border2);`;
+    else                 style = `border-bottom:2.5px solid ${wkColor};`;
+
+    html += `<div class="cal-day" style="${style}" onclick="calSelectDay(${calYear},${calMonth},${d})" title="Week ${wk}">${d}</div>`;
   }
 
-  // trailing blanks
   const trailing = (7 - ((firstDay.getDay() + lastDay.getDate()) % 7)) % 7;
   for (let i = 0; i < trailing; i++)
     html += `<div class="cal-day other-month"></div>`;
@@ -807,8 +826,8 @@ function renderCalendar() {
 
 function calSelectDay(y, m, d) {
   const clicked = new Date(y, m, d);
-  curDay = DAY_ORDER[clicked.getDay()];
-  // if navigating to a different month, snap calendar back to show today's month
+  curDay   = DAY_ORDER[clicked.getDay()];
+  curWeek  = getWeekForDate(clicked);
   calYear  = y;
   calMonth = m;
   saveState();
@@ -817,24 +836,20 @@ function calSelectDay(y, m, d) {
 
 // ── RENDER ─────────────────────────────────────────────────────
 function render() {
-  // Date display
   const now    = new Date();
   const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
+
   document.getElementById('dateDayName').textContent = DAYS[now.getDay()];
   document.getElementById('dateMain').textContent    = `${MONTHS[now.getMonth()]} ${now.getDate()}`;
   document.getElementById('dateYear').textContent    = now.getFullYear();
 
-  // Week circle
+  // Week circle — auto-computed, read-only display
   const wc = document.getElementById('wiCircle');
   wc.textContent = curWeek;
   wc.className   = `wi-circle w${curWeek}`;
-
-  // Week mini-buttons sync
-  document.querySelectorAll('.wi-week-btn').forEach(b => b.classList.remove('active'));
-  const activeWi = document.querySelector(`.wi-week-btn.w${curWeek}`);
-  if (activeWi) activeWi.classList.add('active');
+  document.getElementById('wiSubLabel').textContent = `Week ${curWeek} of 4`;
 
   renderCalendar();
   renderDayTabs();
@@ -987,16 +1002,10 @@ function taskRow(t) {
 function sessionCard() {} // kept for safety, replaced by personCard
 
 // ── CONTROLS ───────────────────────────────────────────────────
-function selectWeek(week, btn) {
-  curWeek = week;
-  document.querySelectorAll('.wi-week-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  saveState();
-  render();
-}
-
 function selectDay(day) {
-  curDay = day;
+  curDay  = day;
+  // recompute week based on most recent Sunday of this day in current cal month
+  // just keep curWeek as-is when browsing days — it was set by calSelectDay or init
   saveState();
   render();
 }
@@ -1009,7 +1018,16 @@ function resetDay() {
 
 // ── INIT ───────────────────────────────────────────────────────
 loadState();
-if (!localStorage.getItem('chore_day')) curDay = TODAY_KEY;
+// Always derive week from today on first load; only override if user tapped a calendar date
+const today0 = new Date();
+if (!localStorage.getItem('chore_day')) {
+  curDay  = TODAY_KEY;
+  curWeek = getWeekForDate(today0);
+} else {
+  // If we have a saved week, respect it (user may have tapped a future date)
+  // but if no saved week, compute from today
+  if (!localStorage.getItem('chore_week')) curWeek = getWeekForDate(today0);
+}
 render();
 </script>
 </body>
